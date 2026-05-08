@@ -102,7 +102,8 @@ void handleButtons() {
 void processSerialData() {
   while (Serial.available() > 0) {
     char c = Serial.read();
-    if (c == '\n') {
+    if (c == '\n' || c == '\r') {
+      if (bufferIndex == 0) continue; // ignora \n do par \r\n
       serialBuffer[bufferIndex] = '\0';
       char *ptr = strtok(serialBuffer, ";");
       if (ptr != NULL) { strncpy(curLap,   ptr, sizeof(curLap)   - 1); ptr = strtok(NULL, ";"); }
