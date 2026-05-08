@@ -30,7 +30,10 @@ jobs:
         run: arduino-cli lib install "U8g2"
 
       - name: Compile sketch
-        run: arduino-cli compile --fqbn esp32:esp32:esp32c3 --output-dir build RacelogicSimHubDevice.ino
+        run: |
+          mkdir RacelogicSimHubDevice
+          cp RacelogicSimHubDevice.ino RacelogicSimHubDevice/
+          arduino-cli compile --fqbn esp32:esp32:esp32c3 --output-dir build RacelogicSimHubDevice/
 
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
