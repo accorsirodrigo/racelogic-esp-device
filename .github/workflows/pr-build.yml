@@ -1,0 +1,50 @@
+name: PR Build Dev
+
+on:
+  issue_comment:
+    types: [created]
+
+jobs:
+  build:
+    if: github.event.issue.pull_request && startsWith(github.event.comment.body, '/build-dev')
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout PR
+        uses: actions/checkout@v4
+        with:
+          ref: refs/pull/${{ github.event.issue.number }}/head
+
+      - name: Install arduino-cli
+        uses: arduino/actions/setup-arduino-cli@v2
+
+      - name: Add ESP32 board URL
+        run: |
+          arduino-cli config init
+          arduino-cli config set board_manager.additional_urls https://espressif.github.io/arduino-esp32/package_esp32_index.json
+
+      - name: Install ESP32 core
+        run: arduino-cli core install esp32:esp32
+
+      - name: Install U8g2 library
+        run: arduino-cli lib install "U8g2"
+
+      - name: Compile sketch
+        run: arduino-cli compile --fqbn esp32:esp32:esp32c3 --output-dir build RacelogicSimHubDevice.ino
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: firmware-esp32c3-dev
+          path: build/
+
+      - name: Post comment on PR
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const url = `https://github.com/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`;
+            github.rest.issues.createComment({
+              ...context.repo,
+              issue_number: context.issue.number,
+              body: `Build concluído! 🔧\n\n[Baixar firmware](${url})`
+            });

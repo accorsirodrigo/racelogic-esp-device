@@ -1,0 +1,36 @@
+name: Build ESP32-C3
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install arduino-cli
+        uses: arduino/actions/setup-arduino-cli@v2
+
+      - name: Add ESP32 board URL
+        run: |
+          arduino-cli config init
+          arduino-cli config set board_manager.additional_urls https://espressif.github.io/arduino-esp32/package_esp32_index.json
+
+      - name: Install ESP32 core
+        run: arduino-cli core install esp32:esp32
+
+      - name: Install U8g2 library
+        run: arduino-cli lib install "U8g2"
+
+      - name: Compile sketch
+        run: arduino-cli compile --fqbn esp32:esp32:esp32c3 --output-dir build RacelogicSimHubDevice.ino
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: firmware-esp32c3
+          path: build/
