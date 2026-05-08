@@ -3,6 +3,8 @@ name: Build ESP32-C3
 on:
   push:
     branches: [main]
+    paths:
+      - '**.ino'
 
 permissions:
   contents: write
