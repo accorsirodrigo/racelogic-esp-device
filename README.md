@@ -2,6 +2,8 @@
 
 ESP32-C3 device that receives real-time telemetry from SimHub over Serial and displays it on a 2.42" OLED screen (SSD1309, 128×64px).
 
+![Screens](assets/screens.jpg)
+
 ## Hardware
 
 | Component | Details |
@@ -9,8 +11,8 @@ ESP32-C3 device that receives real-time telemetry from SimHub over Serial and di
 | MCU | ESP32-C3 |
 | Display | 2.42" OLED SSD1309 128×64 (I2C) |
 | I2C pins | SDA=8, SCL=9 @ 400kHz |
-| Button UP | Pin 5 |
-| Button DOWN | Pin 6 |
+| Button UP | Pin 6 |
+| Button DOWN | Pin 5 |
 | Button ENTER | Pin 7 |
 
 ## Screens
