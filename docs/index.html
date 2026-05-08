@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>RacelogicSimHubDevice — Flash</title>
+  <script type="module" src="https://unpkg.com/esp-web-tools@10/dist/web/install-button.js?module"></script>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: system-ui, sans-serif;
+      background: #0d1117;
+      color: #e6edf3;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .card {
+      background: #161b22;
+      border: 1px solid #30363d;
+      border-radius: 12px;
+      padding: 40px;
+      max-width: 480px;
+      width: 90%;
+      text-align: center;
+    }
+    h1 { font-size: 1.4rem; margin-bottom: 8px; }
+    .subtitle { color: #8b949e; font-size: 0.9rem; margin-bottom: 32px; }
+    .steps {
+      text-align: left;
+      background: #0d1117;
+      border-radius: 8px;
+      padding: 16px 20px;
+      margin-bottom: 28px;
+      font-size: 0.875rem;
+      color: #c9d1d9;
+      line-height: 2;
+    }
+    .steps li { list-style: none; }
+    .steps li::before { content: attr(data-n) ". "; color: #58a6ff; font-weight: 600; }
+    esp-web-install-button {
+      --esp-tools-button-color: #238636;
+      --esp-tools-button-text-color: #fff;
+    }
+    .note { margin-top: 20px; font-size: 0.78rem; color: #8b949e; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>RacelogicSimHubDevice</h1>
+    <p class="subtitle">ESP32-C3 · SimHub OLED Display</p>
+
+    <ul class="steps">
+      <li data-n="1">Conecte o ESP32-C3 via USB</li>
+      <li data-n="2">Segure o botão <strong>BOOT</strong> e pressione <strong>RESET</strong></li>
+      <li data-n="3">Solte o BOOT, então clique em Flash abaixo</li>
+    </ul>
+
+    <esp-web-install-button manifest="manifest.json"></esp-web-install-button>
+
+    <p class="note">Requer Chrome ou Edge. O firmware é o último build do branch main.</p>
+  </div>
+</body>
+</html>
