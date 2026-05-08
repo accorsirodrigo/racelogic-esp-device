@@ -1,40 +1,41 @@
 # RacelogicSimHubDevice
 
-ESP32-C3 device that receives real-time telemetry from SimHub over Serial and displays it on a 2.42" OLED screen (SSD1309, 128×64px).
+Dispositivo ESP32-C3 que recebe telemetria em tempo real do SimHub via Serial e exibe em um display OLED 2.42" (SSD1309, 128×64px).
 
-![Screens](assets/screens.jpg)
+![Telas](assets/screens.jpg)
 
 ## Hardware
 
-| Component | Details |
-|-----------|---------|
+| Componente | Detalhes |
+|------------|----------|
 | MCU | ESP32-C3 |
-| Display | 2.42" OLED SSD1309 128×64 (I2C) |
-| I2C pins | SDA=8, SCL=9 @ 400kHz |
-| Button UP | Pin 6 |
-| Button DOWN | Pin 5 |
-| Button ENTER | Pin 7 |
+| Display | OLED 2.42" SSD1309 128×64 (I2C) |
+| Pinos I2C | SDA=8, SCL=9 @ 400kHz |
+| Botão UP | Pino 6 |
+| Botão DOWN | Pino 5 |
+| Botão ENTER | Pino 7 |
 
-## Screens
+## Telas
 
-Navigate with **UP/DOWN**. **ENTER** cycles sub-modes or enters edit:
+Navegue com **UP/DOWN**. **ENTER** alterna sub-modos ou entra em edição:
 
-| Screen | ENTER action |
-|--------|-------------|
-| Lap Time | Cycles Current → Best → Last lap |
-| Delta | Cycles Gap Best → Gap Last → Gap Optimal |
-| Speed | — |
-| Settings | Enters brightness edit mode (UP/DOWN adjust, ENTER confirms) |
+| Tela | Ação do ENTER |
+|------|---------------|
+| Tempo de Volta | Alterna Volta Atual → Melhor → Última |
+| Delta | Alterna Gap Melhor → Gap Última → Gap Ótimo |
+| Velocidade | — |
+| Combined | — |
+| Configurações | Entra no modo de edição de brilho (UP/DOWN ajustam, ENTER confirma) |
 
-## SimHub Setup
+## Configuração no SimHub
 
-In SimHub, create a custom serial device at **115200 baud** sending:
+No SimHub, crie um dispositivo serial customizado em **115200 baud** enviando:
 
 ```
-[CUR_LAP];[BEST_LAP];[LAST_LAP];[GAP_BEST];[GAP_LAST];[GAP_OPT];[SPEED]\n
+[VOLTA_ATUAL];[MELHOR_VOLTA];[ULTIMA_VOLTA];[GAP_MELHOR];[GAP_ULTIMA];[GAP_OTIMO];[VELOCIDADE]\n
 ```
 
-Example:
+Exemplo:
 ```
 1:23.456;1:22.789;1:24.012;-0.667;+0.345;-1.234;187
 ```
@@ -43,27 +44,27 @@ Example:
 
 Sem instalar nada: acesse **[accorsirodrigo.github.io/racelogic-esp-device](https://accorsirodrigo.github.io/racelogic-esp-device/)**, escolha a versão e clique em Flash (requer Chrome ou Edge com o ESP32-C3 conectado via USB).
 
-## Build & Flash
+## Build & Flash Manual
 
-Requires [arduino-cli](https://arduino.github.io/arduino-cli/), `esp32:esp32` board package, and `U8g2` library.
+Requer [arduino-cli](https://arduino.github.io/arduino-cli/), pacote de placas `esp32:esp32` e a biblioteca `U8g2`.
 
 ```bash
-# First time setup
+# Configuração inicial
 arduino-cli config init
 arduino-cli config set board_manager.additional_urls https://espressif.github.io/arduino-esp32/package_esp32_index.json
 arduino-cli core install esp32:esp32
 arduino-cli lib install "U8g2"
 
-# Compile
-arduino-cli compile --fqbn esp32:esp32:esp32c3 RacelogicSimHubDevice.ino
+# Compilar
+arduino-cli compile --fqbn esp32:esp32:esp32c3:CDCOnBoot=cdc RacelogicSimHubDevice.ino
 
-# Flash (adjust port)
-arduino-cli upload -p COM3 --fqbn esp32:esp32:esp32c3 RacelogicSimHubDevice.ino
+# Gravar (ajuste a porta)
+arduino-cli upload -p COM3 --fqbn esp32:esp32:esp32c3:CDCOnBoot=cdc RacelogicSimHubDevice.ino
 ```
 
 ## CI
 
-| Trigger | Workflow | Resultado |
+| Gatilho | Workflow | Resultado |
 |---------|----------|-----------|
-| Push em `main` | `build.yml` | Compila e sobe firmware como artifact |
-| Comentar `/build-dev` num PR | `pr-build.yml` | Compila o branch do PR e posta link do artifact no comentário |
+| Push em `main` (arquivos `.ino`) | `build.yml` | Compila, publica firmware em `docs/firmware/` e cria release versionada |
+| Comentar `/build-dev` em um PR | `pr-build.yml` | Compila o branch do PR e posta link do artifact no comentário |
