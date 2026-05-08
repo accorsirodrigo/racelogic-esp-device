@@ -57,5 +57,7 @@ arduino-cli upload -p COM3 --fqbn esp32:esp32:esp32c3 RacelogicSimHubDevice.ino
 
 ## CI
 
-Push to `main` triggers a build via GitHub Actions and uploads the compiled firmware as an artifact.  
-Comment `/build-dev` on any PR to trigger a build on that branch.
+| Trigger | Workflow | Resultado |
+|---------|----------|-----------|
+| Push em `main` | `build.yml` | Compila e sobe firmware como artifact |
+| Comentar `/build-dev` num PR | `pr-build.yml` | Compila o branch do PR e posta link do artifact no comentário |
