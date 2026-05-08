@@ -46,6 +46,15 @@ CUR_LAP;BEST_LAP;LAST_LAP;GAP_BEST;GAP_LAST;GAP_OPT;SPEED\n
 
 Field sizes: lap times up to 9 chars (e.g. `1:23.456`), gap values up to 7 chars (e.g. `-1.234`), speed up to 3 chars (km/h integer).
 
+## GitHub Actions
+
+Use the following official Arduino actions (the old `arduino/actions/` subdirectory path is deprecated and broken):
+
+| Purpose | Correct action |
+|---------|---------------|
+| Install arduino-cli | `arduino/setup-arduino-cli@v2` |
+| Compile sketches | `arduino/compile-sketches@v1` |
+
 ## Architecture
 
 The sketch is a state machine with one loop tick per display frame:
