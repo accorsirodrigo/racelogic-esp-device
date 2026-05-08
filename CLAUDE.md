@@ -11,11 +11,11 @@ A single-file Arduino sketch for an **ESP32-C3** that receives real-time telemet
 Using `arduino-cli` (preferred for CLI workflows):
 
 ```bash
-# Compile
-arduino-cli compile --fqbn esp32:esp32:esp32c3 RacelogicSimHubDevice.ino
+# Compile (CDCOnBoot=cdc enables USB CDC so Serial works over USB on HW-466AB)
+arduino-cli compile --fqbn esp32:esp32:esp32c3:CDCOnBoot=cdc RacelogicSimHubDevice.ino
 
 # Upload (replace /dev/ttyUSB0 with the actual port, e.g. COM3 on Windows)
-arduino-cli upload -p /dev/ttyUSB0 --fqbn esp32:esp32:esp32c3 RacelogicSimHubDevice.ino
+arduino-cli upload -p /dev/ttyUSB0 --fqbn esp32:esp32:esp32c3:CDCOnBoot=cdc RacelogicSimHubDevice.ino
 
 # Monitor serial output
 arduino-cli monitor -p /dev/ttyUSB0 --config baudrate=115200

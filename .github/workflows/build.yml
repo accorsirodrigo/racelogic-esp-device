@@ -30,7 +30,7 @@ jobs:
         run: |
           mkdir RacelogicSimHubDevice
           cp RacelogicSimHubDevice.ino RacelogicSimHubDevice/
-          arduino-cli compile --fqbn esp32:esp32:esp32c3 --build-property "build.usbcdc_on_boot=1" --output-dir build RacelogicSimHubDevice/
+          arduino-cli compile --fqbn esp32:esp32:esp32c3:CDCOnBoot=cdc --output-dir build RacelogicSimHubDevice/
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
