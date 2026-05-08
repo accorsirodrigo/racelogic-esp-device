@@ -12,7 +12,7 @@ const int PIN_BTN_DOWN  = 6;
 const int PIN_BTN_ENTER = 7;
 
 // --- Máquina de Estados ---
-enum MainScreens { LAP_TIME, DELTA, SPEED, SETTINGS };
+enum MainScreens { LAP_TIME, DELTA, SPEED, COMBINED, SETTINGS };
 enum LapModes    { CUR, BEST, LAST };
 enum GapModes    { G_BEST, G_LAST, G_OPT };
 
@@ -98,11 +98,11 @@ void handleButtons() {
   }
 
   if (btnUp) {
-    currentScreen = static_cast<MainScreens>((currentScreen + 1) % 4);
+    currentScreen = static_cast<MainScreens>((currentScreen + 1) % 5);
     prefs.putUChar("screen", currentScreen);
   }
   if (btnDown) {
-    currentScreen = static_cast<MainScreens>((currentScreen == 0) ? 3 : currentScreen - 1);
+    currentScreen = static_cast<MainScreens>((currentScreen == 0) ? 4 : currentScreen - 1);
     prefs.putUChar("screen", currentScreen);
   }
 
@@ -157,6 +157,8 @@ void drawHeader() {
     case SPEED:
       u8g2.drawStr(0, 10, "SPEED KM/H");
       break;
+    case COMBINED:
+      break;
     case SETTINGS:
       u8g2.drawStr(0, 10, "BRIGHTNESS");
       if (editMode && (millis() / 500) % 2 == 0)
@@ -174,14 +176,14 @@ void drawContent() {
       char* val = currentLapMode == CUR  ? curLap :
                   currentLapMode == BEST ? bstLap  : lstLap;
       u8g2.setFont(u8g2_font_logisoso28_tn);
-      u8g2.drawStr(5, 46, val);
+      u8g2.drawStr((128 - u8g2.getStrWidth(val)) / 2, 46, val);
       break;
     }
     case DELTA: {
       char* val = currentGapMode == G_BEST ? gBest :
                   currentGapMode == G_LAST ? gLast  : gOpt;
       u8g2.setFont(u8g2_font_logisoso24_tr);
-      u8g2.drawStr(28, 40, val);
+      u8g2.drawStr((128 - u8g2.getStrWidth(val)) / 2, 40, val);
 
       float gVal = atof(val);
       int barWidth = (int)(fabsf(gVal) / 2.0f * 64.0f);
@@ -193,8 +195,18 @@ void drawContent() {
     }
     case SPEED:
       u8g2.setFont(u8g2_font_logisoso42_tn);
-      u8g2.drawStr(25, 58, speedStr);
+      u8g2.drawStr((128 - u8g2.getStrWidth(speedStr)) / 2, 58, speedStr);
       break;
+    case COMBINED: {
+      u8g2.setFont(u8g2_font_logisoso20_tr);
+      u8g2.drawStr((64 - u8g2.getStrWidth(gBest))    / 2,      24, gBest);
+      u8g2.drawStr(64 + (64 - u8g2.getStrWidth(speedStr)) / 2, 24, speedStr);
+      u8g2.drawVLine(64, 0, 30);
+      u8g2.drawHLine(0, 30, 128);
+      u8g2.setFont(u8g2_font_logisoso28_tn);
+      u8g2.drawStr((128 - u8g2.getStrWidth(curLap)) / 2, 62, curLap);
+      break;
+    }
     case SETTINGS: {
       int barWidth = map(brightness, 0, 255, 0, 110);
       u8g2.drawFrame(5, 30, 114, 15);
@@ -251,8 +263,8 @@ void loop() {
   processSerialData();
   debugData();
   
-  // Full redraw quando muda de tela ou sub-modo: envia os 1024 bytes inteiros
-  if (needsFullRedraw()) {
+  // Full redraw quando muda de tela/sub-modo ou na COMBINED (usa y=0..63 inteiro)
+  if (needsFullRedraw() || currentScreen == COMBINED) {
     u8g2.clearBuffer();
     drawHeader();
     drawContent();
