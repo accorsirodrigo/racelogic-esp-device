@@ -7,8 +7,8 @@ U8G2_SSD1309_128X64_NONAME0_F_HW_I2C u8g2(U8G2_R0, /* reset=*/ U8X8_PIN_NONE);
 Preferences prefs;
 
 // --- Mapeamento de Pinos (ESP32-C3) ---
-const int PIN_BTN_UP    = 5;
-const int PIN_BTN_DOWN  = 6;
+const int PIN_BTN_UP    = 6;
+const int PIN_BTN_DOWN  = 5;
 const int PIN_BTN_ENTER = 7;
 
 // --- Máquina de Estados ---
