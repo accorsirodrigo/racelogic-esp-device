@@ -1,10 +1,10 @@
 #include <Arduino.h>
+#include <Preferences.h>
 #include <U8g2lib.h>
 #include <Wire.h>
 
-// Instanciando o display OLED 2.42" I2C (Controlador SSD1309)
-// Utilizando Full Buffer (_F_) para manter o framebuffer em RAM entre frames
 U8G2_SSD1309_128X64_NONAME0_F_HW_I2C u8g2(U8G2_R0, /* reset=*/ U8X8_PIN_NONE);
+Preferences prefs;
 
 // --- Mapeamento de Pinos (ESP32-C3) ---
 const int PIN_BTN_UP    = 5;
@@ -60,6 +60,13 @@ static const uint8_t TILE_COLS  = 16;
 void setup() {
   Serial.begin(115200);
   Serial.setTxTimeoutMs(0);
+
+  prefs.begin("racelogic", false);
+  currentScreen  = (MainScreens)prefs.getUChar("screen",     LAP_TIME);
+  currentLapMode = (LapModes)  prefs.getUChar("lapMode",    CUR);
+  currentGapMode = (GapModes)  prefs.getUChar("gapMode",    G_BEST);
+  brightness     =             prefs.getInt(  "brightness",  128);
+
   Wire.begin(8, 9);
   Wire.setClock(400000);
   u8g2.begin();
@@ -79,24 +86,36 @@ void handleButtons() {
   if (!(btnUp || btnDown || btnEnter)) return;
   lastButtonPress = millis();
 
-  // --- Lógica do Modo de Edição (Brilho) ---
   if (editMode) {
     if (btnUp   && brightness < 255) { brightness += 15; if (brightness > 255) brightness = 255; }
     if (btnDown && brightness > 0)   { brightness -= 15; if (brightness < 0)   brightness = 0;   }
-    if (btnEnter) editMode = false;
+    if (btnEnter) {
+      editMode = false;
+      prefs.putInt("brightness", brightness);
+    }
     u8g2.setContrast(brightness);
     return;
   }
 
-  // --- Navegação Principal de Telas ---
-  if (btnUp)   currentScreen = static_cast<MainScreens>((currentScreen + 1) % 4);
-  if (btnDown) currentScreen = static_cast<MainScreens>((currentScreen == 0) ? 3 : currentScreen - 1);
+  if (btnUp) {
+    currentScreen = static_cast<MainScreens>((currentScreen + 1) % 4);
+    prefs.putUChar("screen", currentScreen);
+  }
+  if (btnDown) {
+    currentScreen = static_cast<MainScreens>((currentScreen == 0) ? 3 : currentScreen - 1);
+    prefs.putUChar("screen", currentScreen);
+  }
 
-  // --- Lógica de Sub-telas baseada no Contexto (Botão Enter) ---
   if (btnEnter) {
-    if      (currentScreen == LAP_TIME) currentLapMode = static_cast<LapModes>((currentLapMode + 1) % 3);
-    else if (currentScreen == DELTA)    currentGapMode = static_cast<GapModes>((currentGapMode + 1) % 3);
-    else if (currentScreen == SETTINGS) editMode = true;
+    if (currentScreen == LAP_TIME) {
+      currentLapMode = static_cast<LapModes>((currentLapMode + 1) % 3);
+      prefs.putUChar("lapMode", currentLapMode);
+    } else if (currentScreen == DELTA) {
+      currentGapMode = static_cast<GapModes>((currentGapMode + 1) % 3);
+      prefs.putUChar("gapMode", currentGapMode);
+    } else if (currentScreen == SETTINGS) {
+      editMode = true;
+    }
   }
 }
 
@@ -201,28 +220,30 @@ void updatePrevState() {
 }
 
 void debugData() {
-  static unsigned long lastDebugPrint = 0;
-  if (millis() - lastDebugPrint < 500) return;
-  lastDebugPrint = millis();
+  if(false) {
+    static unsigned long lastDebugPrint = 0;
+    if (millis() - lastDebugPrint < 500) return;
+    lastDebugPrint = millis();
 
-  Serial.println("=== DEBUG ===");
-  Serial.print("Screen: ");        Serial.println(currentScreen);
-  Serial.print("LapMode: ");       Serial.println(currentLapMode);
-  Serial.print("GapMode: ");       Serial.println(currentGapMode);
-  Serial.print("EditMode: ");      Serial.println(editMode);
-  Serial.print("Brightness: ");    Serial.println(brightness);
-  Serial.print("curLap: ");        Serial.println(curLap);
-  Serial.print("bstLap: ");        Serial.println(bstLap);
-  Serial.print("lstLap: ");        Serial.println(lstLap);
-  Serial.print("gBest: ");         Serial.println(gBest);
-  Serial.print("gLast: ");         Serial.println(gLast);
-  Serial.print("gOpt: ");          Serial.println(gOpt);
-  Serial.print("speedStr: ");      Serial.println(speedStr);
-  Serial.print("prevScreen: ");    Serial.println(prevScreen);
-  Serial.print("prevLapMode: ");   Serial.println(prevLapMode);
-  Serial.print("prevGapMode: ");   Serial.println(prevGapMode);
-  Serial.print("needsFullRedraw: "); Serial.println(needsFullRedraw());
-  Serial.println("================");
+    Serial.println("=== DEBUG ===");
+    Serial.print("Screen: ");        Serial.println(currentScreen);
+    Serial.print("LapMode: ");       Serial.println(currentLapMode);
+    Serial.print("GapMode: ");       Serial.println(currentGapMode);
+    Serial.print("EditMode: ");      Serial.println(editMode);
+    Serial.print("Brightness: ");    Serial.println(brightness);
+    Serial.print("curLap: ");        Serial.println(curLap);
+    Serial.print("bstLap: ");        Serial.println(bstLap);
+    Serial.print("lstLap: ");        Serial.println(lstLap);
+    Serial.print("gBest: ");         Serial.println(gBest);
+    Serial.print("gLast: ");         Serial.println(gLast);
+    Serial.print("gOpt: ");          Serial.println(gOpt);
+    Serial.print("speedStr: ");      Serial.println(speedStr);
+    Serial.print("prevScreen: ");    Serial.println(prevScreen);
+    Serial.print("prevLapMode: ");   Serial.println(prevLapMode);
+    Serial.print("prevGapMode: ");   Serial.println(prevGapMode);
+    Serial.print("needsFullRedraw: "); Serial.println(needsFullRedraw());
+    Serial.println("================");
+  }
 }
 
 void loop() {
