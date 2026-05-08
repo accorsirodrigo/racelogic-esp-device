@@ -34,7 +34,7 @@ In SimHub, create a custom serial device at **115200 baud** sending:
 
 Example:
 ```
-1:23.456;1:22.789;1:24.012;-0.667;+0.345;-1.234;187
+1:23.456;1:22.789;1:24.012;-0.667;+0.345;-1.234;187\n
 ```
 
 ## Build & Flash
