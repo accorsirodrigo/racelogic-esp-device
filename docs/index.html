@@ -94,9 +94,7 @@
     let blobUrl  = null;
 
     function buildManifest(tag) {
-      const base = tag === 'latest'
-        ? `https://github.com/${REPO}/releases/latest/download`
-        : `https://github.com/${REPO}/releases/download/${tag}`;
+      const base = `./firmware/${tag}`;
       return {
         name: 'RacelogicSimHubDevice',
         builds: [{
@@ -124,10 +122,7 @@
         const res = await fetch(`https://api.github.com/repos/${REPO}/releases`);
         const releases = await res.json();
         releases.forEach(r => {
-          if (r.tag_name === 'latest') {
-            select.options[0].textContent = r.name || r.tag_name;
-            return;
-          }
+          if (r.tag_name === 'latest') return;
           const opt = document.createElement('option');
           opt.value = r.tag_name;
           opt.textContent = r.name || r.tag_name;

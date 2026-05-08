@@ -17,6 +17,10 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Generate version tag
+        id: tag
+        run: echo "TAG=v$(date -u '+%Y.%m.%d')-${GITHUB_SHA::7}" >> $GITHUB_OUTPUT
+
       - name: Install arduino-cli
         uses: arduino/setup-arduino-cli@v2
 
@@ -43,18 +47,35 @@ jobs:
           name: firmware-esp32c3
           path: build/
 
+      - name: Deploy firmware to GitHub Pages
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          TAG=${{ steps.tag.outputs.TAG }}
+          mkdir -p docs/firmware/latest docs/firmware/$TAG
+          for dest in docs/firmware/latest docs/firmware/$TAG; do
+            cp build/RacelogicSimHubDevice.ino.bootloader.bin $dest/bootloader.bin
+            cp build/RacelogicSimHubDevice.ino.partitions.bin $dest/partitions.bin
+            cp build/RacelogicSimHubDevice.ino.bin            $dest/firmware.bin
+          done
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git config user.name "github-actions[bot]"
+          git remote set-url origin "https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
+          git add docs/firmware/
+          git diff --staged --quiet || git commit -m "chore: firmware $TAG [skip ci]"
+          git push
+
       - name: Publish release
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
+          TAG=${{ steps.tag.outputs.TAG }}
           cp build/RacelogicSimHubDevice.ino.bootloader.bin build/bootloader.bin
           cp build/RacelogicSimHubDevice.ino.partitions.bin build/partitions.bin
           cp build/RacelogicSimHubDevice.ino.bin            build/firmware.bin
           gh release delete latest --yes 2>/dev/null || true
-          git tag -f latest
-          git push origin latest --force
-          gh release create latest \
-            --title "Latest Build ($(date -u '+%Y-%m-%d %H:%M UTC'))" \
+          gh release create $TAG \
+            --title "$TAG" \
             --notes "Build automático do commit \`${{ github.sha }}\`." \
             build/bootloader.bin \
             build/partitions.bin \
