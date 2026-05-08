@@ -37,6 +37,10 @@ Example:
 1:23.456;1:22.789;1:24.012;-0.667;+0.345;-1.234;187
 ```
 
+## Flash via Browser
+
+Sem instalar nada: acesse **[accorsirodrigo.github.io/racelogic-esp-device](https://accorsirodrigo.github.io/racelogic-esp-device/)**, escolha a versão e clique em Flash (requer Chrome ou Edge com o ESP32-C3 conectado via USB).
+
 ## Build & Flash
 
 Requires [arduino-cli](https://arduino.github.io/arduino-cli/), `esp32:esp32` board package, and `U8g2` library.

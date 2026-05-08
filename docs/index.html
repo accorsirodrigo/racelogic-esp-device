@@ -32,13 +32,31 @@
       background: #0d1117;
       border-radius: 8px;
       padding: 16px 20px;
-      margin-bottom: 28px;
+      margin-bottom: 20px;
       font-size: 0.875rem;
       color: #c9d1d9;
       line-height: 2;
     }
     .steps li { list-style: none; }
     .steps li::before { content: attr(data-n) ". "; color: #58a6ff; font-weight: 600; }
+    .version-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 24px;
+    }
+    .version-row label { font-size: 0.85rem; color: #8b949e; white-space: nowrap; }
+    .version-row select {
+      flex: 1;
+      background: #0d1117;
+      color: #e6edf3;
+      border: 1px solid #30363d;
+      border-radius: 6px;
+      padding: 6px 10px;
+      font-size: 0.875rem;
+      cursor: pointer;
+    }
+    .version-row select:focus { outline: none; border-color: #58a6ff; }
     esp-web-install-button {
       --esp-tools-button-color: #238636;
       --esp-tools-button-text-color: #fff;
@@ -57,9 +75,62 @@
       <li data-n="3">Solte o BOOT, então clique em Flash abaixo</li>
     </ul>
 
-    <esp-web-install-button manifest="manifest.json"></esp-web-install-button>
+    <div class="version-row">
+      <label for="version-select">Versão</label>
+      <select id="version-select">
+        <option value="latest">latest</option>
+      </select>
+    </div>
 
-    <p class="note">Requer Chrome ou Edge. O firmware é o último build do branch main.</p>
+    <esp-web-install-button id="flash-btn" manifest="manifest.json"></esp-web-install-button>
+
+    <p class="note">Requer Chrome ou Edge.</p>
   </div>
+
+  <script>
+    const REPO = 'accorsirodrigo/racelogic-esp-device';
+    const select = document.getElementById('version-select');
+    const btn    = document.getElementById('flash-btn');
+    let blobUrl  = null;
+
+    function buildManifest(tag) {
+      const base = tag === 'latest'
+        ? `https://github.com/${REPO}/releases/latest/download`
+        : `https://github.com/${REPO}/releases/download/${tag}`;
+      return {
+        name: 'RacelogicSimHubDevice',
+        builds: [{
+          chipFamily: 'ESP32-C3',
+          parts: [
+            { path: `${base}/bootloader.bin`, offset: 0 },
+            { path: `${base}/partitions.bin`, offset: 32768 },
+            { path: `${base}/firmware.bin`,   offset: 65536 }
+          ]
+        }]
+      };
+    }
+
+    function applyManifest(tag) {
+      if (blobUrl) URL.revokeObjectURL(blobUrl);
+      const blob = new Blob([JSON.stringify(buildManifest(tag))], { type: 'application/json' });
+      blobUrl = URL.createObjectURL(blob);
+      btn.setAttribute('manifest', blobUrl);
+    }
+
+    select.addEventListener('change', () => applyManifest(select.value));
+
+    (async () => {
+      try {
+        const res = await fetch(`https://api.github.com/repos/${REPO}/releases`);
+        const releases = await res.json();
+        releases.forEach(r => {
+          const opt = document.createElement('option');
+          opt.value = r.tag_name;
+          opt.textContent = r.tag_name;
+          select.appendChild(opt);
+        });
+      } catch (_) {}
+    })();
+  </script>
 </body>
 </html>
