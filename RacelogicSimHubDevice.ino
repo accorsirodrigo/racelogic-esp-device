@@ -59,6 +59,7 @@ static const uint8_t TILE_COLS  = 16;
 
 void setup() {
   Serial.begin(115200);
+  Serial.setTxTimeoutMs(0);
   Wire.begin(8, 9);
   Wire.setClock(400000);
   u8g2.begin();
@@ -199,10 +200,36 @@ void updatePrevState() {
   prevGapMode  = currentGapMode;
 }
 
+void debugData() {
+  static unsigned long lastDebugPrint = 0;
+  if (millis() - lastDebugPrint < 500) return;
+  lastDebugPrint = millis();
+
+  Serial.println("=== DEBUG ===");
+  Serial.print("Screen: ");        Serial.println(currentScreen);
+  Serial.print("LapMode: ");       Serial.println(currentLapMode);
+  Serial.print("GapMode: ");       Serial.println(currentGapMode);
+  Serial.print("EditMode: ");      Serial.println(editMode);
+  Serial.print("Brightness: ");    Serial.println(brightness);
+  Serial.print("curLap: ");        Serial.println(curLap);
+  Serial.print("bstLap: ");        Serial.println(bstLap);
+  Serial.print("lstLap: ");        Serial.println(lstLap);
+  Serial.print("gBest: ");         Serial.println(gBest);
+  Serial.print("gLast: ");         Serial.println(gLast);
+  Serial.print("gOpt: ");          Serial.println(gOpt);
+  Serial.print("speedStr: ");      Serial.println(speedStr);
+  Serial.print("prevScreen: ");    Serial.println(prevScreen);
+  Serial.print("prevLapMode: ");   Serial.println(prevLapMode);
+  Serial.print("prevGapMode: ");   Serial.println(prevGapMode);
+  Serial.print("needsFullRedraw: "); Serial.println(needsFullRedraw());
+  Serial.println("================");
+}
+
 void loop() {
   handleButtons();
   processSerialData();
-
+  debugData();
+  
   // Full redraw quando muda de tela ou sub-modo: envia os 1024 bytes inteiros
   if (needsFullRedraw()) {
     u8g2.clearBuffer();
